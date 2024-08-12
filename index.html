@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>生年月日計算</title>
+    <script>
+        // うるう年の判定
+        function uruuy(years) {
+            let leapYears = [];
+            for (let year of years) {
+                if (year % 4 === 0) {
+                    if (year % 100 === 0) {
+                        if (year % 400 === 0) {
+                            leapYears.push(year);
+                        }
+                    } else {
+                        leapYears.push(year);
+                    }
+                }
+            }
+            return leapYears;
+        }
+
+        // 年単位の日数計算
+        function yD(years) {
+            let D = 0;
+            let leapYears = uruuy(years);
+            for (let year of years) {
+                if (leapYears.includes(year)) {
+                    D += 366;
+                } else {
+                    D += 365;
+                }
+            }
+            return D;
+        }
+
+        // 月単位の日数計算
+        function mD(years, months) {
+            let D = 0;
+            let leapYears = uruuy([years]);
+            for (let month of months) {
+                if ([1, 3, 5, 7, 8, 10, 12].includes(month)) {
+                    D += 31;
+                } else if ([4, 6, 9, 11].includes(month)) {
+                    D += 30;
+                } else if (month === 2) {
+                    if (leapYears.includes(years)) {
+                        D += 29;
+                    } else {
+                        D += 28;
+                    }
+                }
+            }
+            return D;
+        }
+
+        // 日単位の端数の日数計算
+        function dD(years, M_0, D_0, M_n, D_n) {
+            let D = 0;
+            let leapYears = uruuy([years]);
+            if (years === parseInt(document.getElementById("Y_0").value)) {
+                if ([1, 3, 5, 7, 10, 12].includes(M_0)) {
+                    D += 31 - D_0;
+                } else if ([4, 6, 9, 11].includes(M_0)) {
+                    D += 30 - D_0;
+                } else if (M_0 === 2) {
+                    if (leapYears.includes(years)) {
+                        D += 29 - D_0;
+                    } else {
+                        D += 28 - D_0;
+                    }
+                }
+            }
+            if (years === parseInt(document.getElementById("Y_n").value)) {
+                D += D_n;
+            }
+            return D;
+        }
+
+        // 経過日数の計算
+        function calculateDays() {
+            let Y_0 = parseInt(document.getElementById("Y_0").value);
+            let M_0 = parseInt(document.getElementById("M_0").value);
+            let D_0 = parseInt(document.getElementById("D_0").value);
+            let Y_n = parseInt(document.getElementById("Y_n").value);
+            let M_n = parseInt(document.getElementById("M_n").value);
+            let D_n = parseInt(document.getElementById("D_n").value);
+
+            // 生きている時間にまるごと含まれる年
+            let itemy = [];
+            for (let i = 1; i < (Y_n - Y_0); i++) {
+                itemy.push(Y_0 + i);
+            }
+
+            // 生きている時間をまるごと含む年
+            let zennbuy = [];
+            for (let i = 0; i <= (Y_n - Y_0); i++) {
+                zennbuy.push(Y_0 + i);
+            }
+
+            // 誕生年で生きている時間に完全に含まれる月
+            let umaretam = [];
+            for (let k = M_0; k < 12; k++) {
+                umaretam.push(1 + k);
+            }
+
+            // 今年のうち既に過ぎた時間に完全に含まれる月
+            let imam = [];
+            for (let j = 0; j < M_n - 1; j++) {
+                imam.push(1 + j);
+            }
+
+            // 総経過日数の計算
+            let totalDays = yD(zennbuy) + mD(Y_0, umaretam) + mD(Y_n, imam) + dD(Y_0, M_0, D_0, M_n, D_n) + dD(Y_n, M_0, D_0, M_n, D_n);
+            document.getElementById("result").innerText = "あなたが生まれてから " + totalDays + " 日が経ちました！";
+        }
+    </script>
+</head>
+<body>
+    <h1>生年月日計算</h1>
+    <p>あなたの生年月日は？</p>
+    <input type="number" id="Y_0" placeholder="年">
+    <input type="number" id="M_0" placeholder="月">
+    <input type="number" id="D_0" placeholder="日">
+    <p>今日は西暦何年何月何日？</p>
+    <input type="number" id="Y_n" placeholder="年">
+    <input type="number" id="M_n" placeholder="月">
+    <input type="number" id="D_n" placeholder="日">
+    <button onclick="calculateDays()">計算</button>
+    <p id="result"></p>
+</body>
+</html>
